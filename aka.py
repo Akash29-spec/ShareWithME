@@ -1,10 +1,18 @@
 import socket ,os
 import subprocess
+import time
 
-
-client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-client.connect(('127.0.0.1',8000))
-
+while True:
+    try :
+        client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        client.connect(('127.0.0.1',8000))
+        print('Connected')
+        break
+    except Exception as e:
+        print(e)
+        print('Wait to connect with server')
+        time.sleep(5)
+        
 def sendfile():
     file=input('file name')
     if os.path.exists(file):
@@ -16,7 +24,7 @@ def sendfile():
                 client.sendall(chunk)
                 send+=len(chunk)
                 bar='█'*int((send/file_size)*100)+'-'*(100-int((send/file_size)*100))
-                print(f"\rsending : |{bar}|",end='')
+                print(f"\rsending : |{bar}|{send}",end='')
         print()
     else :
         print('file is not found')      
@@ -42,13 +50,23 @@ def getfile(data):
             print(f"\rRecived : |{bar}|{recive}",end='') 
     return arr[0]
 
+def IpNo(no,ips):
+    for i ,item in enumerate(ips,start=1):
+        if no==i:
+            return item[0]
 while True:
-    # ips=client.recv(64).decode()
-    # print(ips)
-    # print('For exit print -1')
-    # choice=int(input('enter a choice'))
-    # if 0<choice<len(ips):
-    #     client.sendall(ips[ip-1])
+    all_ips=subprocess.run(['arp','-a'],capture_output=True,text=True)
+    selected_ip=[i.split() for i in all_ips.stdout.splitlines() if 'dynamic'in i]
+    for i,item in enumerate(selected_ip,start=1):
+        print(i,item[0])
+    choice=int(input('enter a choice'))
+   
+    if 0<choice<len(selected_ip[0][0]):
+        ip=IpNo(choice,selected_ip)
+        client.sendall(ip.encode().ljust(64,b' '))
+                       
+       
+        
         while True:
             a=input('what you wnat to send :\n1.file\n2.massage\n3.exit\n')
             client.sendall(a.encode())
@@ -64,9 +82,9 @@ while True:
                     os.system('arp -a')
                 case _ :
                     print('you entered wrong choice')
+       
+    elif choice==-1:
         break
-    # elif choice==-1:
-    #     break
-    # else :
-    #     print('you entered wrong ip choice')   
+    else :
+        print('you entered wrong ip choice')   
 client.close()
