@@ -74,7 +74,6 @@ server.listen(3)
 while True:
     data,info=server.accept()
     t1=threading.Thread(target=client,args=(data,info))
-
     t1.start()
     
      
