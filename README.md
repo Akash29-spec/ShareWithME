@@ -1,2 +1,2 @@
 # ShareWithME
-Share file between two computer using LAN network
+Share file between two computer using LAN network.
